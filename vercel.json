@@ -1,7 +1,42 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.+(png|jpg|mp4)",
+      "use": "@vercel/static"
+    }
+  ],
   "routes": [
-    { "src": "/videos/(.*)", "dest": "/videos/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    // 1. 优先匹配真实文件（图片、视频等）
+    {
+      "src": "/地图.png",
+      "dest": "/地图.png"
+    },
+    {
+      "src": "/videos/(.*.mp4)",
+      "dest": "/videos/$1"
+    },
+    // 2. 所有其他请求返回 index.html（支持前端交互）
+    {
+      "src": "/(.*)",
+      "dest": "/index.html",
+      "status": 200
+    }
+  ],
+  "headers": [
+    // 允许视频跨域访问（如果视频来自其他域名）
+    {
+      "source": "/videos/.*.mp4",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
   ]
 }
