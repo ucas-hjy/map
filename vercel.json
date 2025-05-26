@@ -2,7 +2,7 @@
   "version": 2,
   "routes": [
     // 优先匹配图片文件
-    { "src": "/地图.png", "dest": "/地图.png" },
+    { "src": "/map.png", "dest": "/map.png" },
     // 匹配视频目录
     { "src": "/videos/(.*)", "dest": "/videos/$1" },
     // 其他所有请求返回index.html
