@@ -2,15 +2,31 @@
   "version": 2,
   "builds": [
     {
-      "src": "**/*.html",
+      "src": "index.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
-    // 优先匹配真实文件（如图片、视频）
-    { "src": "/videos/(.*)", "dest": "/videos/$1" },
-    { "src": "/(.*\\.(png|jpg|mp4))", "dest": "/$1" },
-    // 其他所有请求返回 index.html（支持前端路由）
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/videos/(.*)",
+      "destination": "/videos/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/videos/.*.mp4",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
   ]
 }
