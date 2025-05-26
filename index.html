@@ -9,7 +9,7 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        /* 新版热点样式 */
+        /* 热点样式 */
         .hotspot {
             position: absolute;
             width: 30px;
@@ -24,7 +24,6 @@
             justify-content: center;
             font-family: "黑体", sans-serif;
         }
-        /* 文字标注 */
         .hotspot::after {
             content: attr(data-name);
             position: absolute;
@@ -40,7 +39,6 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        /* 悬停效果 */
         .hotspot:hover {
             transform: scale(1.2);
             background: rgba(255, 0, 0, 0.6);
@@ -48,7 +46,7 @@
         .hotspot:hover::after {
             opacity: 1;
         }
-        /* 视频弹窗优化 */
+        /* 视频弹窗 */
         .video-modal {
             display: none;
             position: fixed;
@@ -66,7 +64,7 @@
             max-width: 800px;
             max-height: 80vh;
         }
-        /* 新版关闭按钮 */
+        /* 关闭按钮 */
         .close-btn {
             position: fixed;
             right: 30px;
@@ -101,7 +99,7 @@
 <body>
     <div class="map-container">
         <img src="map.png" style="width: 100%;" alt="互动地图">
-        <!-- 热点区域 -->
+        <!-- 热点区域（视频路径直接使用文件名） -->
         <div class="hotspot" style="left: 81%; top: 12%;" data-video="01.mp4" data-name="前三门护城河1"></div>
         <div class="hotspot" style="left: 28%; top: 16%;" data-video="02.mp4" data-name="前三门护城河2"></div>
         <div class="hotspot" style="left: 70%; top: 14%;" data-video="03.mp4" data-name="前三门护城河3"></div>
@@ -118,7 +116,13 @@
 
     <div class="video-modal">
         <span class="close-btn" title="关闭视频">×</span>
-        <video controls id="modal-video">
+        <video 
+            id="modal-video"
+            controls
+            playsinline
+            webkit-playsinline
+            preload="auto"
+        >
             <source src="" type="video/mp4">
             您的浏览器不支持HTML5视频
         </video>
@@ -132,14 +136,35 @@
 
         // 点击热点播放视频
         hotspots.forEach(hotspot => {
-            hotspot.addEventListener('click', () => {
+            hotspot.addEventListener('click', async () => {
                 const videoSrc = hotspot.getAttribute('data-video');
-                video.querySelector('source').src = videoSrc;
-                video.load();
-                modal.style.display = 'flex'; // 改为flex显示
-                video.play().catch(e => {
-                    video.controls = true; // 如果自动播放失败，显示控制条
-                });
+                
+                // 显示加载状态
+                video.innerHTML = `<p style="color:white">视频加载中...</p>`;
+                modal.style.display = 'flex';
+
+                try {
+                    // 动态创建新的source元素（避免缓存问题）
+                    video.innerHTML = `
+                        <source src="${videoSrc}" type="video/mp4" crossorigin>
+                        您的浏览器不支持视频播放
+                    `;
+                    
+                    // 处理自动播放策略
+                    await video.load();
+                    const playPromise = video.play();
+                    
+                    if (playPromise !== undefined) {
+                        await playPromise.catch(e => {
+                            video.controls = true; // 自动播放失败时显示控制条
+                        });
+                    }
+                } catch (e) {
+                    video.innerHTML = `
+                        <p style="color:red">视频加载失败</p>
+                        <p style="color:white">${e.message}</p>
+                    `;
+                }
             });
         });
 
@@ -157,7 +182,7 @@
         function closeVideo() {
             modal.style.display = 'none';
             video.pause();
-            video.currentTime = 0; // 重置播放进度
+            video.currentTime = 0;
         }
     </script>
 </body>
